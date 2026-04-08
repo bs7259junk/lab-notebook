@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16
+    container_name: eln_db
+    environment:
+      POSTGRES_DB: elndb
+      POSTGRES_USER: elnuser
+      POSTGRES_PASSWORD: elnpass
+    ports:
+      - "5436:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elnuser -d elndb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: eln_backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://elnuser:elnpass@db:5432/elndb
+      SECRET_KEY: dev-secret-key-change-in-production
+      UPLOAD_DIR: /uploads
+      CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000"]'
+    ports:
+      - "8003:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./uploads:/uploads
+
+  frontend:
+    build: ./frontend
+    container_name: eln_frontend
+    environment:
+      BACKEND_URL: http://backend:8000
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
