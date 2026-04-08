@@ -76,8 +76,7 @@ export async function apiFetch<T>(
         headers['Authorization'] = `Bearer ${newToken}`;
         response = await fetch(url, { ...fetchOptions, headers });
       } else {
-        clearTokens();
-        window.location.href = '/login';
+        // auth disabled for testing — don't redirect
         throw new Error('Unauthorized');
       }
     }

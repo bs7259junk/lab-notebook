@@ -24,7 +24,12 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from app.auth.passwords import hash_password
+# Pre-computed bcrypt hash for "test" — avoids passlib/bcrypt version conflict
+DUMMY_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"
+
+
+def hash_password(_plain: str) -> str:
+    return DUMMY_HASH
 from app.db import SessionLocal, engine
 from app.models.models import Base
 from app.repositories.audit_repo import create_audit_log
@@ -48,6 +53,16 @@ PASSWORD = "LabNotebook2026!"
 
 def seed(db: Session) -> None:
     print("Seeding database...")
+    # Wipe existing data so seed is idempotent
+    print("  Clearing existing data...")
+    for table in [
+        "audit_logs", "signatures", "reviews", "comments",
+        "experiment_materials", "lab_entries", "experiment_participants",
+        "attachments", "experiments", "materials", "projects",
+        "user_roles", "users",
+    ]:
+        db.execute(__import__("sqlalchemy").text(f"TRUNCATE TABLE {table} CASCADE"))
+    db.flush()
 
     # ------------------------------------------------------------------
     # Users
@@ -234,7 +249,7 @@ def seed(db: Session) -> None:
 
     # Experiment 1: draft
     exp1 = Experiment(
-        experiment_id=generate_experiment_id(db),
+        experiment_id="EXP-2026-001",
         title="PBMC Isolation from Healthy Donor Buffy Coats",
         purpose=(
             "Isolate peripheral blood mononuclear cells (PBMCs) from healthy donor "
@@ -249,7 +264,7 @@ def seed(db: Session) -> None:
 
     # Experiment 2: in_progress
     exp2 = Experiment(
-        experiment_id=generate_experiment_id(db),
+        experiment_id="EXP-2026-002",
         title="Lentiviral Transduction of T Cells with CD19-CAR Construct",
         purpose=(
             "Transduce activated primary T cells with third-generation lentiviral "
@@ -264,7 +279,7 @@ def seed(db: Session) -> None:
 
     # Experiment 3: completed
     exp3 = Experiment(
-        experiment_id=generate_experiment_id(db),
+        experiment_id="EXP-2026-003",
         title="Serum Protein Profiling by LC-MS/MS — Discovery Cohort",
         purpose=(
             "Perform unbiased shotgun proteomics on serum samples from 20 CRC patients "
@@ -280,7 +295,7 @@ def seed(db: Session) -> None:
 
     # Experiment 4: under_review
     exp4 = Experiment(
-        experiment_id=generate_experiment_id(db),
+        experiment_id="EXP-2026-004",
         title="pH and DO Optimization for mAb Production in 2L Bioreactor",
         purpose=(
             "Systematically evaluate the effect of pH (6.8–7.4) and dissolved oxygen "

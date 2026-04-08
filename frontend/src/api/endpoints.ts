@@ -16,19 +16,19 @@ import type {
 
 // Auth
 export const login = (username: string, password: string) =>
-  apiFetch<LoginResponse>('/api/auth/login', {
+  apiFetch<LoginResponse>('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ username, password }),
     skipAuth: true,
   });
 
 // Projects
-export const getProjects = () => apiFetch<Project[]>('/api/projects');
+export const getProjects = () => apiFetch<Project[]>('/projects');
 
 export const getProject = (id: number) => apiFetch<Project>(`/api/projects/${id}`);
 
 export const createProject = (data: { title: string; description?: string }) =>
-  apiFetch<Project>('/api/projects', { method: 'POST', body: JSON.stringify(data) });
+  apiFetch<Project>('/projects', { method: 'POST', body: JSON.stringify(data) });
 
 // Experiments
 export interface ExperimentFilters {
@@ -54,7 +54,7 @@ export const createExperiment = (data: {
   purpose?: string;
   project_id?: number;
 }) =>
-  apiFetch<Experiment>('/api/experiments', { method: 'POST', body: JSON.stringify(data) });
+  apiFetch<Experiment>('/experiments', { method: 'POST', body: JSON.stringify(data) });
 
 export const transitionStatus = (id: number, new_status: string, comment?: string) =>
   apiFetch<Experiment>(`/api/experiments/${id}/status`, {
@@ -149,7 +149,7 @@ export const signExperiment = (
   });
 
 // Users
-export const getUsers = () => apiFetch<User[]>('/api/users');
+export const getUsers = () => apiFetch<User[]>('/users');
 
 export const createUser = (data: {
   username: string;
@@ -158,7 +158,7 @@ export const createUser = (data: {
   full_name?: string;
   roles?: string[];
 }) =>
-  apiFetch<User>('/api/users', { method: 'POST', body: JSON.stringify(data) });
+  apiFetch<User>('/users', { method: 'POST', body: JSON.stringify(data) });
 
 // Audit Log
 export const getAuditLog = (entityId: number) =>
