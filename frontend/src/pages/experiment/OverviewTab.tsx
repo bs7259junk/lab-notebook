@@ -138,7 +138,7 @@ export default function OverviewTab({ experiment }: Props) {
           {experiment.barcode && (
             <MetaRow
               icon={<Barcode size={16} />}
-              label="Barcode"
+              label="Inventory Barcode"
               value={<span className="font-mono">{experiment.barcode}</span>}
             />
           )}

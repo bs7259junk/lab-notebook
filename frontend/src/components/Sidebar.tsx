@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
   { to: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
   { to: '/projects', icon: <FolderOpen size={18} />, label: 'Projects' },
   { to: '/experiments', icon: <FlaskConical size={18} />, label: 'Experiments' },
-  { to: '/barcode', icon: <ScanBarcode size={18} />, label: 'Barcode Lookup' },
+  { to: '/barcode', icon: <ScanBarcode size={18} />, label: 'Inventory Lookup' },
   { to: '/users', icon: <Users size={18} />, label: 'Users', adminOnly: true },
 ];
 

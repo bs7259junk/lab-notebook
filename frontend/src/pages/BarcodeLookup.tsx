@@ -39,15 +39,15 @@ export default function BarcodeLookup() {
   return (
     <div className="p-8 max-w-2xl">
       <PageHeader
-        title="Barcode Lookup"
-        subtitle="Find an experiment by its barcode"
+        title="Inventory Lookup"
+        subtitle="Find an experiment by its inventory barcode"
       />
 
       {/* Search Form */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Experiment Barcode
+            Inventory Barcode
           </label>
           <div className="flex gap-3">
             <div className="relative flex-1">
@@ -58,7 +58,7 @@ export default function BarcodeLookup() {
                 onChange={e => setBarcode(e.target.value)}
                 autoFocus
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter or scan barcode…"
+                placeholder="Enter or scan inventory barcode…"
               />
             </div>
             <button
@@ -124,7 +124,7 @@ export default function BarcodeLookup() {
           <ul className="space-y-1.5 text-sm text-gray-500">
             <li className="flex items-start gap-2">
               <span className="text-gray-300 mt-0.5">•</span>
-              Enter the barcode printed on the experiment label
+              Enter the inventory barcode printed on the experiment label
             </li>
             <li className="flex items-start gap-2">
               <span className="text-gray-300 mt-0.5">•</span>
