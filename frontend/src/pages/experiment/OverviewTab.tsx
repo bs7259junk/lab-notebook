@@ -161,9 +161,9 @@ export default function OverviewTab({ experiment }: Props) {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">
-                      {p.full_name || p.username}
+                      {p.role}
                     </p>
-                    <p className="text-xs text-gray-400">{p.email}</p>
+                    <p className="text-xs text-gray-400">User {p.user_id.slice(0, 8)}</p>
                   </div>
                 </div>
               ))}

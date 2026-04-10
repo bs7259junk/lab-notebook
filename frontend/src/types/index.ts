@@ -4,137 +4,140 @@ export type ExperimentStatus =
   | 'completed'
   | 'signed'
   | 'in_review'
+  | 'under_review'
   | 'approved'
   | 'archived';
 
 export interface Project {
-  id: number;
-  project_id: string;
+  id: string;
+  project_code: string;
   title: string;
   description: string | null;
   status: string;
-  owner_id: number;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface Experiment {
-  id: number;
+  id: string;
   experiment_id: string;
   title: string;
   purpose: string | null;
   status: ExperimentStatus;
-  project_id: number | null;
-  owner_id: number;
+  project_id: string | null;
+  owner_id: string;
   version: number;
   barcode: string | null;
+  completed_at: string | null;
   created_at: string;
   updated_at: string;
-  project?: Project;
-  owner?: User;
 }
 
 export interface LabEntry {
-  id: number;
-  experiment_id: number;
+  id: string;
+  experiment_id: string;
   section: string;
   content: string;
   version: number;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface ExperimentMaterial {
-  id: number;
-  experiment_id: number;
+  id: string;
+  experiment_id: string;
   material_name: string;
   lot_number: string | null;
   quantity_used: number | null;
   unit: string | null;
   barcode: string | null;
-  created_at: string;
+  notes: string | null;
+  added_by: string;
+  added_at: string;
 }
 
 export interface Attachment {
-  id: number;
-  experiment_id: number;
+  id: string;
+  experiment_id: string;
   filename: string;
-  original_filename: string;
-  file_size: number;
+  stored_filename: string;
+  file_size_bytes: number;
   content_type: string;
-  uploader_id: number;
-  created_at: string;
-  uploader?: User;
+  uploaded_by: string;
+  uploaded_at: string;
+  description: string | null;
 }
 
 export interface Comment {
-  id: number;
-  experiment_id: number;
-  author_id: number;
+  id: string;
+  experiment_id: string;
+  author_id: string;
+  comment_type: string;
   content: string;
-  parent_id: number | null;
+  is_deleted: boolean;
   created_at: string;
   updated_at: string;
-  author?: User;
 }
 
 export interface Review {
-  id: number;
-  experiment_id: number;
-  reviewer_id: number;
+  id: string;
+  experiment_id: string;
+  reviewer_id: string;
   status: 'pending' | 'in_review' | 'approved' | 'returned';
   comments: string | null;
   created_at: string;
   updated_at: string;
-  reviewer?: User;
+  completed_at: string | null;
 }
 
 export interface Signature {
-  id: number;
-  experiment_id: number;
-  signer_id: number;
+  id: string;
+  experiment_id: string;
+  signer_id: string;
   signature_type: string;
   meaning: string;
   signed_at: string;
-  signer?: User;
+  ip_address: string | null;
 }
 
 export interface AuditLog {
-  id: number;
+  id: string;
   entity_type: string;
-  entity_id: number;
+  entity_id: string;
   action: string;
-  actor_username: string;
+  actor_username: string | null;
   timestamp: string;
-  old_value: string | null;
-  new_value: string | null;
+  old_value: Record<string, unknown> | null;
+  new_value: Record<string, unknown> | null;
+}
+
+export interface UserRole {
+  id: string;
+  role: string;
+  assigned_at: string;
 }
 
 export interface User {
-  id: number;
+  id: string;
   username: string;
   email: string;
-  full_name: string | null;
+  full_name: string;
   is_active: boolean;
-  roles: string[];
+  roles: UserRole[];
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface ExperimentDetail extends Experiment {
-  entries: LabEntry[];
-  materials: ExperimentMaterial[];
-  participants: User[];
+  entries?: LabEntry[];
+  materials?: ExperimentMaterial[];
+  participants?: Array<{ id: string; user_id: string; role: string; added_at: string }>;
 }
 
 export interface LoginResponse {
   access_token: string;
   refresh_token: string;
   token_type: string;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  size: number;
 }

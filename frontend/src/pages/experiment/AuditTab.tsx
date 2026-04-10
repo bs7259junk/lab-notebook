@@ -15,7 +15,7 @@ const ACTION_STYLES: Record<string, string> = {
 };
 
 interface Props {
-  experimentId: number;
+  experimentId: string;
 }
 
 export default function AuditTab({ experimentId }: Props) {
@@ -55,14 +55,14 @@ export default function AuditTab({ experimentId }: Props) {
                   {log.new_value && (
                     <span className="flex items-center gap-1 text-xs text-gray-400">
                       <ChevronRight size={12} />
-                      {log.new_value.length > 60 ? log.new_value.slice(0, 60) + '…' : log.new_value}
+                      {JSON.stringify(log.new_value).slice(0, 80)}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-3 mt-0.5">
                   {log.old_value && (
                     <span className="text-xs text-gray-400 line-through">
-                      {log.old_value.length > 40 ? log.old_value.slice(0, 40) + '…' : log.old_value}
+                      {JSON.stringify(log.old_value).slice(0, 60)}
                     </span>
                   )}
                   <span className="text-xs text-gray-400">

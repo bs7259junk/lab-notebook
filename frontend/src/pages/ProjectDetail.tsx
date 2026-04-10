@@ -9,18 +9,18 @@ import ErrorMessage from '../components/ErrorMessage';
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
-  const projectId = Number(id);
+  const projectId = id ?? '';
 
   const { data: project, isLoading: projLoading, error: projError } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => getProject(projectId),
-    enabled: !isNaN(projectId),
+    enabled: !!projectId,
   });
 
   const { data: experiments = [], isLoading: expsLoading } = useQuery({
     queryKey: ['experiments', { project_id: projectId }],
     queryFn: () => getExperiments({ project_id: projectId }),
-    enabled: !isNaN(projectId),
+    enabled: !!projectId,
   });
 
   if (projLoading || expsLoading) {
@@ -55,7 +55,7 @@ export default function ProjectDetail() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-bold text-gray-900">{project.title}</h1>
-              <span className="text-sm text-gray-400 font-mono">{project.project_id}</span>
+              <span className="text-sm text-gray-400 font-mono">{project.project_code}</span>
             </div>
             {project.description && (
               <p className="text-gray-600 mb-3">{project.description}</p>

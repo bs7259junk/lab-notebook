@@ -9,7 +9,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import type { ExperimentStatus } from '../types';
 
 const STATUS_ORDER: ExperimentStatus[] = [
-  'draft', 'active', 'completed', 'signed', 'in_review', 'approved', 'archived',
+  'draft', 'active', 'completed', 'signed', 'in_review', 'under_review', 'approved', 'archived',
 ];
 
 const STATUS_COLORS: Record<ExperimentStatus, string> = {
@@ -18,6 +18,7 @@ const STATUS_COLORS: Record<ExperimentStatus, string> = {
   completed: 'bg-green-50 border-green-200',
   signed: 'bg-purple-50 border-purple-200',
   in_review: 'bg-yellow-50 border-yellow-200',
+  under_review: 'bg-yellow-50 border-yellow-200',
   approved: 'bg-emerald-50 border-emerald-200',
   archived: 'bg-gray-50 border-gray-200',
 };
@@ -28,6 +29,7 @@ const STATUS_ICON_COLORS: Record<ExperimentStatus, string> = {
   completed: 'text-green-500',
   signed: 'text-purple-500',
   in_review: 'text-yellow-500',
+  under_review: 'text-yellow-500',
   approved: 'text-emerald-500',
   archived: 'text-gray-400',
 };

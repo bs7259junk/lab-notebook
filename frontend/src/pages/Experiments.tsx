@@ -48,7 +48,7 @@ export default function Experiments() {
       getExperiments({
         search: debouncedSearch || undefined,
         status: status || undefined,
-        project_id: projectId ? Number(projectId) : undefined,
+        project_id: projectId || undefined,
       }),
   });
 

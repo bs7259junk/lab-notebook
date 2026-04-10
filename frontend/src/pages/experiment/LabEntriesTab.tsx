@@ -14,7 +14,7 @@ const SECTIONS = [
 ];
 
 interface SectionEditorProps {
-  experimentId: number;
+  experimentId: string;
   section: string;
   label: string;
   placeholder: string;

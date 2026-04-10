@@ -12,6 +12,7 @@ import Modal from '../components/Modal';
 export default function Projects() {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [projectCode, setProjectCode] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [formError, setFormError] = useState('');
@@ -22,7 +23,7 @@ export default function Projects() {
   });
 
   const createMutation = useMutation({
-    mutationFn: () => createProject({ title, description: description || undefined }),
+    mutationFn: () => createProject({ project_code: projectCode.toUpperCase(), title, description: description || undefined }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setShowCreate(false);
@@ -35,6 +36,7 @@ export default function Projects() {
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
+    if (!projectCode.trim()) { setFormError('Project code is required'); return; }
     if (!title.trim()) { setFormError('Title is required'); return; }
     createMutation.mutate();
   }
@@ -90,7 +92,7 @@ export default function Projects() {
                 <p className="text-sm text-gray-500 mb-3 line-clamp-2">{project.description}</p>
               )}
               <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
-                <span className="text-xs text-gray-400 font-mono">{project.project_id}</span>
+                <span className="text-xs text-gray-400 font-mono">{project.project_code}</span>
                 <span className="text-xs text-gray-400">
                   {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
                 </span>
@@ -104,6 +106,18 @@ export default function Projects() {
         <Modal title="New Project" onClose={() => setShowCreate(false)}>
           <form onSubmit={handleCreate} className="space-y-4">
             {formError && <ErrorMessage message={formError} />}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Project Code *</label>
+              <input
+                type="text"
+                value={projectCode}
+                onChange={e => setProjectCode(e.target.value)}
+                required
+                autoFocus
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 uppercase"
+                placeholder="e.g. PROJ-001"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Title *</label>
               <input

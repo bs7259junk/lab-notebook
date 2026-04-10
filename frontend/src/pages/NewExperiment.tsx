@@ -27,7 +27,7 @@ export default function NewExperiment() {
       createExperiment({
         title,
         purpose: purpose || undefined,
-        project_id: projectId ? Number(projectId) : undefined,
+        project_id: projectId || undefined,
       }),
     onSuccess: (exp) => {
       navigate(`/experiments/${exp.id}`);

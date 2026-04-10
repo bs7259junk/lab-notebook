@@ -114,13 +114,13 @@ export default function Users() {
                     <td className="px-6 py-3.5">
                       <div className="flex flex-wrap gap-1">
                         {user.roles && user.roles.length > 0 ? (
-                          user.roles.map(role => (
+                          user.roles.map(r => (
                             <span
-                              key={role}
+                              key={r.id ?? r.role}
                               className="inline-flex items-center gap-1 text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-full"
                             >
                               <Shield size={10} />
-                              {role}
+                              {r.role}
                             </span>
                           ))
                         ) : (

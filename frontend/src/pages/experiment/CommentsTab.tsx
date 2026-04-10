@@ -10,7 +10,7 @@ import type { Comment } from '../../types';
 
 interface CommentItemProps {
   comment: Comment;
-  experimentId: number;
+  experimentId: string;
   depth?: number;
 }
 
@@ -41,7 +41,7 @@ function CommentItem({ comment, experimentId, depth = 0 }: CommentItemProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm font-medium text-gray-900">
-                {comment.author?.full_name || comment.author?.username || `User #${comment.author_id}`}
+                {`User ${comment.author_id.slice(0, 8)}`}
               </span>
               <span className="text-xs text-gray-400">
                 {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
@@ -99,7 +99,7 @@ function CommentItem({ comment, experimentId, depth = 0 }: CommentItemProps) {
 }
 
 interface Props {
-  experimentId: number;
+  experimentId: string;
 }
 
 export default function CommentsTab({ experimentId }: Props) {
@@ -129,11 +129,11 @@ export default function CommentsTab({ experimentId }: Props) {
   }
 
   // Build comment tree
-  const topLevel = comments.filter(c => !c.parent_id);
-  const replies = comments.filter(c => c.parent_id);
+  const topLevel = comments.filter(c => c.comment_type !== 'reply');
+  const replies = comments.filter(c => c.comment_type === 'reply');
 
-  function getReplies(parentId: number): Comment[] {
-    return replies.filter(r => r.parent_id === parentId);
+  function getReplies(_parentId: string): Comment[] {
+    return replies; // flat list, threading not supported
   }
 
   return (

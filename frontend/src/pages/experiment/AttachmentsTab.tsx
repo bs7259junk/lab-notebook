@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Upload, FileText, Download, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
-import { getAttachments, uploadAttachment, downloadAttachment } from '../../api/endpoints';
+import { getAttachments, uploadAttachment, downloadAttachmentUrl } from '../../api/endpoints';
 import { getAccessToken } from '../../auth';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
@@ -14,7 +14,7 @@ function formatBytes(bytes: number): string {
 }
 
 interface Props {
-  experimentId: number;
+  experimentId: string;
 }
 
 export default function AttachmentsTab({ experimentId }: Props) {
@@ -47,10 +47,10 @@ export default function AttachmentsTab({ experimentId }: Props) {
     handleFiles(e.dataTransfer.files);
   }
 
-  function handleDownload(attachmentId: number, filename: string) {
-    const url = downloadAttachment(experimentId, attachmentId);
+  function handleDownload(attachmentId: string, filename: string) {
+    const url = downloadAttachmentUrl(attachmentId);
     const token = getAccessToken();
-    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then(res => res.blob())
       .then(blob => {
         const a = document.createElement('a');
@@ -122,14 +122,14 @@ export default function AttachmentsTab({ experimentId }: Props) {
                     <FileText size={16} className="text-gray-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{att.original_filename}</p>
+                    <p className="text-sm font-medium text-gray-900">{att.filename}</p>
                     <p className="text-xs text-gray-400">
-                      {formatBytes(att.file_size)} · {format(new Date(att.created_at), 'MMM d, yyyy')}
+                      {formatBytes(att.file_size_bytes)} · {format(new Date(att.uploaded_at), 'MMM d, yyyy')}
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => handleDownload(att.id, att.original_filename)}
+                  onClick={() => handleDownload(att.id, att.filename)}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-indigo-600 hover:text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
                 >
                   <Download size={13} />

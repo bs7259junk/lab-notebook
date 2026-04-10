@@ -27,14 +27,14 @@ const TABS = [
 ];
 
 export default function ExperimentDetail() {
-  const { id } = useParams<{ id: string }>();
-  const experimentId = Number(id);
+  const { id } = useParams();
+  const experimentId = id ?? '';
   const [activeTab, setActiveTab] = useState('overview');
 
   const { data: experiment, isLoading, error } = useQuery({
     queryKey: ['experiment', experimentId],
     queryFn: () => getExperiment(experimentId),
-    enabled: !isNaN(experimentId),
+    enabled: !!experimentId,
     refetchOnWindowFocus: false,
   });
 

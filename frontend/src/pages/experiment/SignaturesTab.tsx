@@ -10,7 +10,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import type { Signature } from '../../types';
 
 interface Props {
-  experimentId: number;
+  experimentId: string;
 }
 
 export default function SignaturesTab({ experimentId }: Props) {
@@ -74,7 +74,7 @@ export default function SignaturesTab({ experimentId }: Props) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-900">
-                    {sig.signer?.full_name || sig.signer?.username || `User #${sig.signer_id}`}
+                    {`User ${sig.signer_id.slice(0, 8)}`}
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">{sig.meaning}</p>
                   <div className="flex items-center gap-3 mt-1">

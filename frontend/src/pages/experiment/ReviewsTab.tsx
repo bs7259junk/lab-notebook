@@ -16,7 +16,7 @@ const REVIEW_STATUS_STYLES: Record<string, string> = {
 };
 
 interface Props {
-  experimentId: number;
+  experimentId: string;
 }
 
 export default function ReviewsTab({ experimentId }: Props) {
@@ -25,7 +25,7 @@ export default function ReviewsTab({ experimentId }: Props) {
   const [selectedReviewerId, setSelectedReviewerId] = useState('');
   const [requestError, setRequestError] = useState('');
   const [actionError, setActionError] = useState('');
-  const [reviewComments, setReviewComments] = useState<Record<number, string>>({});
+  const [reviewComments, setReviewComments] = useState<Record<string, string>>({});
 
   const { data: reviews = [], isLoading } = useQuery({
     queryKey: ['reviews', experimentId],
@@ -38,7 +38,7 @@ export default function ReviewsTab({ experimentId }: Props) {
   });
 
   const requestMutation = useMutation({
-    mutationFn: () => createReview(experimentId, Number(selectedReviewerId)),
+    mutationFn: () => createReview(experimentId, selectedReviewerId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews', experimentId] });
       setShowRequestModal(false);
@@ -49,8 +49,8 @@ export default function ReviewsTab({ experimentId }: Props) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ reviewId, status, comments }: { reviewId: number; status: string; comments?: string }) =>
-      updateReview(experimentId, reviewId, { status, comments }),
+    mutationFn: ({ reviewId, status, comments }: { reviewId: string; status: string; comments?: string }) =>
+      updateReview(reviewId, { status, comments }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews', experimentId] });
       queryClient.invalidateQueries({ queryKey: ['experiment', experimentId] });
