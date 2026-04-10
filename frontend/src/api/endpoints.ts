@@ -30,6 +30,9 @@ export const getProject = (id: string) => apiFetch<Project>(`/projects/${id}`);
 export const createProject = (data: { project_code: string; title: string; description?: string }) =>
   apiFetch<Project>('/projects', { method: 'POST', body: JSON.stringify(data) });
 
+export const updateProject = (id: string, data: { title?: string; description?: string }) =>
+  apiFetch<Project>(`/projects/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+
 // Experiments
 export interface ExperimentFilters {
   project_id?: string;

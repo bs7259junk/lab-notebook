@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Plus, FolderOpen, ChevronRight } from 'lucide-react';
+import { Plus, FolderOpen, ChevronRight, Pencil } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { getProjects, createProject } from '../api/endpoints';
+import { getProjects, createProject, updateProject } from '../api/endpoints';
 import PageHeader from '../components/PageHeader';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import Modal from '../components/Modal';
+import type { Project } from '../types';
 
 export default function Projects() {
   const queryClient = useQueryClient();
@@ -16,6 +17,10 @@ export default function Projects() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [formError, setFormError] = useState('');
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editError, setEditError] = useState('');
 
   const { data: projects = [], isLoading, error } = useQuery({
     queryKey: ['projects'],
@@ -33,6 +38,31 @@ export default function Projects() {
     },
     onError: (err: Error) => setFormError(err.message),
   });
+
+  const editMutation = useMutation({
+    mutationFn: () => updateProject(editingProject!.id, { title: editTitle, description: editDescription || undefined }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setEditingProject(null);
+      setEditError('');
+    },
+    onError: (err: Error) => setEditError(err.message),
+  });
+
+  function openEdit(e: React.MouseEvent, project: Project) {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditingProject(project);
+    setEditTitle(project.title);
+    setEditDescription(project.description || '');
+    setEditError('');
+  }
+
+  function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editTitle.trim()) { setEditError('Title is required'); return; }
+    editMutation.mutate();
+  }
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -85,7 +115,16 @@ export default function Projects() {
                 <div className="bg-indigo-100 rounded-lg p-2 mb-3">
                   <FolderOpen size={18} className="text-indigo-600" />
                 </div>
-                <ChevronRight size={16} className="text-gray-300 group-hover:text-indigo-400 transition-colors mt-1" />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={e => openEdit(e, project)}
+                    className="p-1.5 rounded-md text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 transition-colors opacity-0 group-hover:opacity-100"
+                    title="Edit project"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <ChevronRight size={16} className="text-gray-300 group-hover:text-indigo-400 transition-colors mt-0.5" />
+                </div>
               </div>
               <h3 className="font-semibold text-gray-900 text-base mb-1">{project.title}</h3>
               {project.description && (
@@ -100,6 +139,50 @@ export default function Projects() {
             </Link>
           ))}
         </div>
+      )}
+
+      {editingProject && (
+        <Modal title="Edit Project" onClose={() => setEditingProject(null)}>
+          <form onSubmit={handleEdit} className="space-y-4">
+            {editError && <ErrorMessage message={editError} />}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Title *</label>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+                required
+                autoFocus
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+              <textarea
+                value={editDescription}
+                onChange={e => setEditDescription(e.target.value)}
+                rows={3}
+                className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setEditingProject(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={editMutation.isPending}
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 rounded-lg transition-colors"
+              >
+                {editMutation.isPending ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       {showCreate && (
