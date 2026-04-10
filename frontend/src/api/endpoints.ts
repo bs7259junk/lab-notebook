@@ -168,7 +168,8 @@ export const createUser = (data: {
 
 // Audit Log
 export const getAuditLog = (entityId: string) =>
-  apiFetch<AuditLog[]>(`/audit?entity_id=${entityId}`);
+  apiFetch<{ items: AuditLog[] }>(`/audit?entity_id=${entityId}`)
+    .then(res => res.items);
 
 // Barcode
 export const lookupBarcode = (barcode: string) =>

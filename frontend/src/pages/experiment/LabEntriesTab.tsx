@@ -6,7 +6,7 @@ import ErrorMessage from '../../components/ErrorMessage';
 import type { ExperimentDetail, LabEntry } from '../../types';
 
 const SECTIONS = [
-  { key: 'hypothesis', label: 'Hypothesis', placeholder: 'State the hypothesis for this experiment…' },
+  { key: 'hypothesis', label: 'Purpose', placeholder: 'State the purpose of this experiment…' },
   { key: 'protocol', label: 'Protocol', placeholder: 'Describe the experimental protocol and procedures…' },
   { key: 'results', label: 'Results', placeholder: 'Record the results and observations…' },
   { key: 'observations', label: 'Observations', placeholder: 'Note any observations made during the experiment…' },
