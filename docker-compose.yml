@@ -19,11 +19,12 @@ services:
   backend:
     build: ./backend
     container_name: eln_backend
+    env_file: .env
     environment:
       DATABASE_URL: postgresql+psycopg://elnuser:elnpass@db:5432/elndb
       SECRET_KEY: dev-secret-key-change-in-production
       UPLOAD_DIR: /uploads
-      CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000"]'
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:5173"]'
     ports:
       - "8003:8000"
     depends_on:
@@ -39,7 +40,7 @@ services:
     environment:
       BACKEND_URL: http://backend:8000
     ports:
-      - "3001:80"
+      - "3000:80"
     depends_on:
       - backend
 

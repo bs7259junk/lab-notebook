@@ -4,9 +4,9 @@ Seed script for the Electronic Lab Notebook.
 Creates:
 - 5 users with realistic roles
 - 3 projects
-- 4 experiments across projects (draft, in_progress, completed, under_review)
-- 5 materials in the catalog
-- Lab entries, materials usage, comments, one review
+- 10 experiments across projects
+- 8 materials in the catalog
+- Lab entries, materials usage, comments, reviews, signatures
 - Audit log entries for all seed actions
 
 Run with:
@@ -48,7 +48,7 @@ from app.models.models import (
     UserRole,
 )
 
-PASSWORD = "LabNotebook2026!"
+PASSWORD = "Lab2026!"
 
 
 def seed(db: Session) -> None:
@@ -169,6 +169,24 @@ def seed(db: Session) -> None:
             "vendor": "Mirus Bio",
             "barcode": "MAT-MB-005",
         },
+        {
+            "name": "Chromium-51 Sodium Chromate",
+            "catalog_number": "CJS1",
+            "vendor": "PerkinElmer",
+            "barcode": "MAT-PE-006",
+        },
+        {
+            "name": "LGALS3BP ELISA Kit (Human)",
+            "catalog_number": "E-EL-H0655",
+            "vendor": "Elabscience",
+            "barcode": "MAT-EL-007",
+        },
+        {
+            "name": "Anti-CD19 CAR Lentiviral Vector (FMC63, 3rd gen)",
+            "catalog_number": "LV-CD19-3G",
+            "vendor": "VectorBuilder",
+            "barcode": "MAT-VB-008",
+        },
     ]
 
     materials = []
@@ -188,6 +206,9 @@ def seed(db: Session) -> None:
             actor_username=admin.username,
             new_value={"name": m.name, "catalog_number": m.catalog_number},
         )
+
+    # Convenience references
+    anticd19, ficoll, rpmi, fbs, lenti, cr51, lgals3bp_kit, car_vector = materials
 
     # ------------------------------------------------------------------
     # Projects
@@ -309,18 +330,113 @@ def seed(db: Session) -> None:
     )
     exp4.completed_at = datetime(2026, 3, 20, 9, 0, 0, tzinfo=timezone.utc)
 
-    for exp in [exp1, exp2, exp3, exp4]:
+    # Experiment 5: completed — CAR-T Cytotoxicity Assay
+    exp5 = Experiment(
+        experiment_id="EXP-2026-005",
+        title="CAR-T Cytotoxicity Assay — 4-Hour 51Cr Release",
+        purpose=(
+            "Assess cytolytic activity of manufactured CD19 CAR-T cells against Raji (CD19+) "
+            "and K562 (CD19-) target cell lines using a 4-hour chromium-51 release assay at "
+            "E:T ratios of 1:1, 5:1, 10:1, and 20:1."
+        ),
+        project_id=proj_cart.id,
+        owner_id=alice.id,
+        status="completed",
+        barcode="EXP-BC-005",
+    )
+    exp5.completed_at = datetime(2026, 3, 15, tzinfo=timezone.utc)
+
+    # Experiment 6: active — G-Rex bioreactor scale-up
+    exp6 = Experiment(
+        experiment_id="EXP-2026-006",
+        title="T Cell Expansion in G-Rex 10 Bioreactor — Scale-Up Run 1",
+        purpose=(
+            "Evaluate large-scale T cell expansion in G-Rex 10 closed system bioreactor "
+            "for CAR-T manufacturing. Target: ≥500×10^6 viable T cells at Day 14 with "
+            ">80% viability and <30% exhausted phenotype (PD-1+TIM-3+)."
+        ),
+        project_id=proj_cart.id,
+        owner_id=bob.id,
+        status="active",
+        barcode="EXP-BC-006",
+    )
+
+    # Experiment 7: approved — LGALS3BP ELISA validation
+    exp7 = Experiment(
+        experiment_id="EXP-2026-007",
+        title="ELISA Validation of LGALS3BP as CRC Biomarker — 96-Sample Validation Cohort",
+        purpose=(
+            "Validate LGALS3BP (Galectin-3 binding protein) as a serum biomarker for "
+            "early-stage colorectal cancer using a commercial sandwich ELISA in an independent "
+            "96-sample cohort (48 CRC, 48 healthy controls)."
+        ),
+        project_id=proj_bio.id,
+        owner_id=carol.id,
+        status="approved",
+        barcode="EXP-BC-007",
+    )
+    exp7.completed_at = datetime(2026, 3, 10, tzinfo=timezone.utc)
+
+    # Experiment 8: in_progress — Western blot confirmation
+    exp8 = Experiment(
+        experiment_id="EXP-2026-008",
+        title="Western Blot Confirmation of Top 5 Candidate Biomarkers",
+        purpose=(
+            "Confirm differential expression of top 5 candidate biomarkers (LGALS3BP, CEA, "
+            "CEACAM5, CA19-9 precursor, APOA1) identified by LC-MS/MS using Western blot in "
+            "20 paired CRC/HC serum samples."
+        ),
+        project_id=proj_bio.id,
+        owner_id=alice.id,
+        status="in_progress",
+        barcode="EXP-BC-008",
+    )
+
+    # Experiment 9: completed — Fed-batch vs perfusion
+    exp9 = Experiment(
+        experiment_id="EXP-2026-009",
+        title="Fed-Batch vs Perfusion Mode Comparison for IgG1 Titer",
+        purpose=(
+            "Compare final IgG1 titer and cell-specific productivity between fed-batch and "
+            "perfusion culture modes in 2L bioreactors using the same CHO-K1 clone. "
+            "Primary endpoint: final harvest titer (g/L)."
+        ),
+        project_id=proj_proc.id,
+        owner_id=carol.id,
+        status="completed",
+        barcode="EXP-BC-009",
+    )
+    exp9.completed_at = datetime(2026, 3, 25, tzinfo=timezone.utc)
+
+    # Experiment 10: draft — Protein A chromatography optimization
+    exp10 = Experiment(
+        experiment_id="EXP-2026-010",
+        title="Protein A Affinity Chromatography Optimization",
+        purpose=(
+            "Optimize Protein A affinity chromatography step for mAb capture including load "
+            "challenge, wash buffer composition, and elution pH to maximize yield and minimize "
+            "HCP co-purification."
+        ),
+        project_id=proj_proc.id,
+        owner_id=bob.id,
+        status="draft",
+        barcode="EXP-BC-010",
+    )
+
+    all_exps = [exp1, exp2, exp3, exp4, exp5, exp6, exp7, exp8, exp9, exp10]
+    for exp in all_exps:
         db.add(exp)
     db.flush()
 
-    for exp in [exp1, exp2, exp3, exp4]:
+    for exp in all_exps:
+        owner_user = next(u for u in [alice, bob, carol] if u.id == exp.owner_id)
         create_audit_log(
             db=db,
             entity_type="experiment",
             entity_id=str(exp.id),
             action="created",
-            actor_id=alice.id if exp.owner_id == alice.id else carol.id,
-            actor_username="alice" if exp.owner_id == alice.id else "carol",
+            actor_id=owner_user.id,
+            actor_username=owner_user.username,
             new_value={
                 "experiment_id": exp.experiment_id,
                 "title": exp.title,
@@ -333,6 +449,9 @@ def seed(db: Session) -> None:
     db.add(ExperimentParticipant(experiment_id=exp2.id, user_id=bob.id, role="technician"))
     db.add(ExperimentParticipant(experiment_id=exp3.id, user_id=alice.id, role="scientist"))
     db.add(ExperimentParticipant(experiment_id=exp4.id, user_id=bob.id, role="technician"))
+    db.add(ExperimentParticipant(experiment_id=exp5.id, user_id=bob.id, role="technician"))
+    db.add(ExperimentParticipant(experiment_id=exp7.id, user_id=alice.id, role="scientist"))
+    db.add(ExperimentParticipant(experiment_id=exp9.id, user_id=bob.id, role="technician"))
     db.flush()
 
     # ------------------------------------------------------------------
@@ -456,16 +575,126 @@ def seed(db: Session) -> None:
     ]
     for entry in entries3:
         db.add(entry)
+
+    # EXP-5 (completed) — cytotoxicity assay entries
+    entries5 = [
+        LabEntry(
+            experiment_id=exp5.id,
+            section="results",
+            content=(
+                "Specific lysis at E:T 20:1: Raji 78.3±4.2%, K562 3.1±0.8% (background). "
+                "EC50 calculated as E:T 7.4. Results demonstrate robust and antigen-specific "
+                "cytotoxicity consistent with functional CAR-T product."
+            ),
+            version=1,
+            created_by=alice.id,
+        ),
+        LabEntry(
+            experiment_id=exp5.id,
+            section="observations",
+            content=(
+                "Strong antigen-specific killing confirmed. CD19-negative K562 controls show "
+                "minimal non-specific lysis (<5% at all E:T ratios). Ready to proceed to "
+                "in vivo xenograft model."
+            ),
+            version=1,
+            created_by=alice.id,
+        ),
+    ]
+    for entry in entries5:
+        db.add(entry)
+
+    # EXP-6 (active) — bioreactor scale-up entry
+    entries6 = [
+        LabEntry(
+            experiment_id=exp6.id,
+            section="protocol",
+            content=(
+                "Day 0: Seed 5×10^6 activated T cells in 40 mL complete XT media + 200 IU/mL IL-2. "
+                "Day 7: Harvest, count, restimulate and re-seed at 0.5×10^6/mL. "
+                "Day 14: Final harvest, phenotype panel, cryopreservation."
+            ),
+            version=1,
+            created_by=bob.id,
+        ),
+    ]
+    for entry in entries6:
+        db.add(entry)
+
+    # EXP-7 (approved) — LGALS3BP ELISA validation entries
+    entries7 = [
+        LabEntry(
+            experiment_id=exp7.id,
+            section="results",
+            content=(
+                "LGALS3BP median: CRC 24.7 µg/mL (IQR 18.2–33.1) vs HC 11.3 µg/mL (IQR 8.6–15.4), "
+                "p<0.0001 Mann-Whitney. ROC AUC: 0.91 (95% CI 0.85–0.97). Optimal cutoff 17.5 µg/mL: "
+                "sensitivity 87.5%, specificity 85.4%."
+            ),
+            version=1,
+            created_by=carol.id,
+        ),
+    ]
+    for entry in entries7:
+        db.add(entry)
+
+    # EXP-8 (in_progress) — Western blot entries
+    entries8 = [
+        LabEntry(
+            experiment_id=exp8.id,
+            section="protocol",
+            content=(
+                "1. Run 12% SDS-PAGE with 10 µg protein per lane. "
+                "2. Transfer to PVDF membrane (100V, 1h). "
+                "3. Block 5% BSA/TBST 1h RT. "
+                "4. Primary antibodies overnight at 4°C. "
+                "5. Secondary HRP-conjugated antibody 1h RT. "
+                "6. ECL detection. "
+                "Antibodies: anti-LGALS3BP (Abcam ab87792), anti-CEA (Cell Signaling 4435S), "
+                "anti-CEACAM5 (R&D Systems MAB1643)."
+            ),
+            version=1,
+            created_by=alice.id,
+        ),
+    ]
+    for entry in entries8:
+        db.add(entry)
+
+    # EXP-9 (completed) — fed-batch vs perfusion entries
+    entries9 = [
+        LabEntry(
+            experiment_id=exp9.id,
+            section="results",
+            content=(
+                "Fed-batch Day 14 titer: 4.2 g/L ± 0.3 (n=3 bioreactors). "
+                "Perfusion Day 14 titer: 6.8 g/L ± 0.4 (n=3 bioreactors). "
+                "Cell-specific productivity: fed-batch 18.4 pg/cell/day, perfusion 22.1 pg/cell/day. "
+                "Perfusion mode shows 62% higher titer. Statistical significance: p=0.003 (two-tailed t-test)."
+            ),
+            version=1,
+            created_by=carol.id,
+        ),
+        LabEntry(
+            experiment_id=exp9.id,
+            section="observations",
+            content=(
+                "Perfusion mode significantly outperforms fed-batch for this clone. Main concern is "
+                "operational complexity and increased media cost. Recommend cost-benefit analysis "
+                "before process lock."
+            ),
+            version=1,
+            created_by=carol.id,
+        ),
+    ]
+    for entry in entries9:
+        db.add(entry)
+
     db.flush()
 
     # ------------------------------------------------------------------
     # Materials usage on experiments
     # ------------------------------------------------------------------
     print("  Adding experiment materials...")
-
-    ficoll, rpmi, fbs, lenti, anticd19 = (
-        materials[1], materials[2], materials[3], materials[4], materials[0]
-    )
 
     em1 = ExperimentMaterial(
         experiment_id=exp1.id,
@@ -525,8 +754,37 @@ def seed(db: Session) -> None:
         added_by=alice.id,
         notes="8 µg/mL final concentration in 500 µL wells",
     )
+    em7 = ExperimentMaterial(
+        experiment_id=exp5.id,
+        material_id=cr51.id,
+        material_name=cr51.name,
+        lot_number="CR51-PE-2026-01",
+        quantity_used=100.0,
+        unit="µCi",
+        added_by=alice.id,
+        notes="Handled under radiological safety protocols per SOP-RAD-002",
+    )
+    em8 = ExperimentMaterial(
+        experiment_id=exp7.id,
+        material_id=lgals3bp_kit.id,
+        material_name=lgals3bp_kit.name,
+        lot_number="EL-H0655-2026-03",
+        quantity_used=1.0,
+        unit="kit (96-well)",
+        added_by=carol.id,
+    )
+    em9 = ExperimentMaterial(
+        experiment_id=exp6.id,
+        material_id=car_vector.id,
+        material_name=car_vector.name,
+        lot_number="LV-CD19-3G-2026-02",
+        quantity_used=500.0,
+        unit="µL",
+        added_by=bob.id,
+        notes="Titer: 1.5×10^9 TU/mL. Large-scale transduction aliquot.",
+    )
 
-    for em in [em1, em2, em3, em4, em5, em6]:
+    for em in [em1, em2, em3, em4, em5, em6, em7, em8, em9]:
         db.add(em)
     db.flush()
 
@@ -594,21 +852,21 @@ def seed(db: Session) -> None:
     # ------------------------------------------------------------------
     # Review for EXP-4
     # ------------------------------------------------------------------
-    print("  Creating review...")
+    print("  Creating reviews...")
 
-    review = Review(
+    review4 = Review(
         experiment_id=exp4.id,
         reviewer_id=dave.id,
         status="in_review",
         comments="Under active review. Awaiting bioreactor log attachment.",
     )
-    db.add(review)
+    db.add(review4)
     db.flush()
 
     create_audit_log(
         db=db,
         entity_type="review",
-        entity_id=str(review.id),
+        entity_id=str(review4.id),
         action="created",
         actor_id=carol.id,
         actor_username="carol",
@@ -631,12 +889,51 @@ def seed(db: Session) -> None:
         new_value={"status": "under_review"},
     )
 
-    # ------------------------------------------------------------------
-    # Completion signature for EXP-3
-    # ------------------------------------------------------------------
-    print("  Adding signature...")
+    # Review for EXP-7 (approved)
+    review7 = Review(
+        experiment_id=exp7.id,
+        reviewer_id=dave.id,
+        status="approved",
+        comments=(
+            "Excellent validation results. AUC >0.9 meets our pre-specified success criterion. "
+            "Recommend proceeding to clinical study design."
+        ),
+    )
+    db.add(review7)
+    db.flush()
 
-    sig = Signature(
+    create_audit_log(
+        db=db,
+        entity_type="review",
+        entity_id=str(review7.id),
+        action="created",
+        actor_id=carol.id,
+        actor_username="carol",
+        new_value={
+            "experiment_id": str(exp7.id),
+            "reviewer_id": str(dave.id),
+            "status": "approved",
+        },
+    )
+
+    create_audit_log(
+        db=db,
+        entity_type="experiment",
+        entity_id=str(exp7.id),
+        action="status_changed",
+        actor_id=dave.id,
+        actor_username="dave",
+        old_value={"status": "under_review"},
+        new_value={"status": "approved"},
+    )
+
+    # ------------------------------------------------------------------
+    # Signatures
+    # ------------------------------------------------------------------
+    print("  Adding signatures...")
+
+    # EXP-3: completion signature by carol
+    sig3 = Signature(
         experiment_id=exp3.id,
         signer_id=carol.id,
         signature_type="completion",
@@ -644,26 +941,130 @@ def seed(db: Session) -> None:
         ip_address="10.0.1.42",
         user_agent="Mozilla/5.0 (seed script)",
     )
-    db.add(sig)
+    db.add(sig3)
     db.flush()
 
     create_audit_log(
         db=db,
         entity_type="signature",
-        entity_id=str(sig.id),
+        entity_id=str(sig3.id),
         action="signed",
         actor_id=carol.id,
         actor_username="carol",
         new_value={
             "experiment_id": str(exp3.id),
             "signature_type": "completion",
-            "meaning": sig.meaning,
+            "meaning": sig3.meaning,
+        },
+    )
+
+    # EXP-5: completion signature by alice
+    sig5 = Signature(
+        experiment_id=exp5.id,
+        signer_id=alice.id,
+        signature_type="completion",
+        meaning="I confirm that the above experiment was conducted as described and the data recorded is accurate and complete.",
+        ip_address="10.0.1.41",
+        user_agent="Mozilla/5.0 (seed script)",
+    )
+    db.add(sig5)
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        entity_type="signature",
+        entity_id=str(sig5.id),
+        action="signed",
+        actor_id=alice.id,
+        actor_username="alice",
+        new_value={
+            "experiment_id": str(exp5.id),
+            "signature_type": "completion",
+            "meaning": sig5.meaning,
+        },
+    )
+
+    # EXP-7: completion signature by carol
+    sig7_completion = Signature(
+        experiment_id=exp7.id,
+        signer_id=carol.id,
+        signature_type="completion",
+        meaning="I confirm that the above experiment was conducted as described and the data recorded is accurate and complete.",
+        ip_address="10.0.1.42",
+        user_agent="Mozilla/5.0 (seed script)",
+    )
+    db.add(sig7_completion)
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        entity_type="signature",
+        entity_id=str(sig7_completion.id),
+        action="signed",
+        actor_id=carol.id,
+        actor_username="carol",
+        new_value={
+            "experiment_id": str(exp7.id),
+            "signature_type": "completion",
+            "meaning": sig7_completion.meaning,
+        },
+    )
+
+    # EXP-7: review signature by dave
+    sig7_review = Signature(
+        experiment_id=exp7.id,
+        signer_id=dave.id,
+        signature_type="review",
+        meaning="I have reviewed the above experiment record and approve its content as accurate and compliant.",
+        ip_address="10.0.1.44",
+        user_agent="Mozilla/5.0 (seed script)",
+    )
+    db.add(sig7_review)
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        entity_type="signature",
+        entity_id=str(sig7_review.id),
+        action="signed",
+        actor_id=dave.id,
+        actor_username="dave",
+        new_value={
+            "experiment_id": str(exp7.id),
+            "signature_type": "review",
+            "meaning": sig7_review.meaning,
+        },
+    )
+
+    # EXP-9: completion signature by carol
+    sig9 = Signature(
+        experiment_id=exp9.id,
+        signer_id=carol.id,
+        signature_type="completion",
+        meaning="I confirm that the above experiment was conducted as described and the data recorded is accurate and complete.",
+        ip_address="10.0.1.42",
+        user_agent="Mozilla/5.0 (seed script)",
+    )
+    db.add(sig9)
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        entity_type="signature",
+        entity_id=str(sig9.id),
+        action="signed",
+        actor_id=carol.id,
+        actor_username="carol",
+        new_value={
+            "experiment_id": str(exp9.id),
+            "signature_type": "completion",
+            "meaning": sig9.meaning,
         },
     )
 
     db.commit()
     print("Seed complete.")
-    print("\nSeeded users (all password: LabNotebook2026!):")
+    print("\nSeeded users (all password: Lab2026!):")
     for u, roles_list in [
         (admin, ["admin"]),
         (alice, ["scientist"]),
